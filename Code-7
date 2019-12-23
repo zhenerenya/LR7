@@ -1,0 +1,193 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <conio.h>
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+
+//структура данных
+struct Worker
+{
+	string name;
+	string date;
+	string post;
+	int sol;
+};
+
+
+//элемент списка
+struct Plist
+{
+	Worker worker; //инф поле
+	Plist* pnext; //на следующий элемент списка
+};
+
+//список
+struct List
+{
+	Plist* head;
+};
+
+
+
+void AddFirst(List& list, Plist* p)
+{
+	p->pnext = list.head;
+	list.head = p;
+}
+
+//преобразование string в char*
+char* stringtochar(string a)
+{
+	char* b = new char[a.length() + 1];
+	return strcpy(b, a.c_str());
+}
+
+//получние строк с фамилиями
+string fam(string a)
+{
+	char* b = stringtochar(a);
+	char* fam = new char[a.length() + 1];
+	for (int i = 0; i < strlen(b); i++)
+	{
+		fam[i] = '\0';
+	}
+
+	for (int i = 0; i < strlen(b); i++)
+	{
+		if (b[i] != ' ') fam[i] = b[i];
+	}
+	string s = fam;
+	return s;
+}
+
+//сравнение
+int comparison(string& a, string& b)
+{
+	char* fam1 = stringtochar(fam(a));
+	char* fam2 = stringtochar(fam(b));
+	int n; //длина наименьшей фамилии
+
+
+	if (strlen(fam1) > strlen(fam2)) n = strlen(fam1); else n = strlen(fam2);
+	for (int i = 0; i < n; i++)
+	{
+
+		if (fam1[i] == fam2[i]) continue;
+		else
+		{
+			if (fam1[i] > fam2[i])
+			{
+				return 1;
+			}
+			else return 0;
+		}
+
+	}
+}
+
+//удаляем элемент из списка
+Plist * removing(List& list, Plist* p1) 
+{
+	if (list.head == 0 || p1 == 0) return 0; //Ошибка
+	if (p1 == list.head) list.head = list.head->pnext;
+
+		Plist* p0 = list.head;
+		while (p0 && p0->pnext != p1)
+		{
+			p0 = p0->pnext;
+		}
+		if (p0 == 0) return 0;
+		p0->pnext = p1->pnext;
+	
+	return p1;
+}
+
+//добавить после заданного
+void addafterp(Plist* p, Plist* pAfter)
+{
+	pAfter->pnext = p->pnext;
+	p->pnext = pAfter;
+}
+
+
+
+int main()
+{
+	List list1;
+	list1.head = 0;
+	Plist* p; //указатель на данный элемент
+
+
+	//Ввод списка
+	char stop; //индикатор конца списка
+	do
+	{
+		p = new Plist;
+		cout << "\nName: ";
+		getline(cin, p->worker.name);
+		cout << "Date: ";
+		getline(cin, p->worker.date);
+		cout << "Post: ";
+		getline(cin, p->worker.post);
+		cout << "Solare: ";
+		cin >> p->worker.sol;
+		cin.ignore();
+		//добавляем элемент в начало списка
+		AddFirst(list1, p);
+		cout << "Press 'c' to continue, else another buttom.";
+		stop = _getche();
+	} while (stop == 'c');
+
+	cout << endl << "Before " << endl;
+	for (Plist* pi = list1.head; pi; pi = pi->pnext)
+	{
+		cout << endl << pi->worker.name << " " << pi->worker.date <<
+			" " << pi->worker.post << " " << pi->worker.sol;
+	}
+	cout << endl << endl << endl << endl << endl << endl;
+
+	//сортировка
+	bool change = false;
+		
+	do
+	{
+		change = false; //были ли замены
+		Plist* p1 = list1.head;
+		Plist* p2 = list1.head->pnext;
+		if (p2 == 0) break; //если состоит из одного элемента
+		do 
+		{	
+			if (comparison(p1->worker.name, p2->worker.name))
+			{
+				p1=removing(list1, p1);
+				if (p1 == 0)
+				{
+					cout << "Error. " << endl;
+					return 0;
+				}
+
+				addafterp(p1, p2);
+				
+				change = true;		
+			}
+				p1 = p2;
+				p2 = p2->pnext;
+		} while (p2!=0);
+		
+	} while (change);
+	
+	cout << "after " << endl;
+	
+	//вывод после сортировки
+	for (Plist* t = list1.head; t; t = t->pnext)
+	{
+		cout << endl << t->worker.name << " " << t->worker.date <<
+			" " << t->worker.post << " " << t->worker.sol;
+	}
+	
+	return 0;
+}
+
+
